@@ -19,8 +19,12 @@ repositories {
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	implementation("org.liquibase:liquibase-core:4.29.1")
+	implementation("mysql:mysql-connector-java:8.0.33")
+	implementation("org.projectlombok:lombok:1.18.34")
+	implementation("io.github.cdimascio:dotenv-java:3.2.0")
+
+	annotationProcessor("org.projectlombok:lombok:1.18.34")
 }
 
 tasks.withType<Test> {
