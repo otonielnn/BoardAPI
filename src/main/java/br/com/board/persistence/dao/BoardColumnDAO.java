@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.mysql.cj.jdbc.StatementImpl;
 
+import br.com.board.dto.BoardColumnDTO;
 import br.com.board.persistence.entity.BoardColumnEntity;
 import br.com.board.persistence.entity.BoardColumnKindEnum;
 import lombok.RequiredArgsConstructor;
@@ -52,5 +53,37 @@ public class BoardColumnDAO {
         }
 
         return entities;
+    }
+
+    public List<BoardColumnDTO> findByBoardIdWithDetails(final Long id) throws SQLException{
+        List<BoardColumnDTO> dtos = new ArrayList<>();
+        String sql = """
+        SELECT COUNT(id) from boards_columns
+        SELECT bc.id,
+              bc.name,
+              bc.kind
+              COUNT(SELECT c.id
+                    FROM CARDS c
+                    WHERE c.board_column_id = bc.id) cards_amount
+        FROM BOARDS_COLUMNS
+        WHERE board_id = ?
+        ORDER BY `order`;
+        """;
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, id);
+            statement.executeQuery();
+            ResultSet resultSet = statement.getResultSet();
+            while (resultSet.next()) {
+                BoardColumnDTO dto = new BoardColumnDTO(
+                    resultSet.getLong("bc.id"),
+                    resultSet.getString("bc.name"),
+                    BoardColumnKindEnum.findByName(resultSet.getString("bc.kind")),
+                    resultSet.getInt("bc.cards_amount")
+                );
+                dtos.add(dto);
+            }
+        }
+
+        return dtos;
     }
 }

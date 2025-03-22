@@ -2,8 +2,11 @@ package br.com.board.service;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 
+import br.com.board.dto.BoardColumnDTO;
+import br.com.board.dto.BoardDetailsDTO;
 import br.com.board.persistence.dao.BoardColumnDAO;
 import br.com.board.persistence.dao.BoardDAO;
 import br.com.board.persistence.entity.BoardEntity;
@@ -22,6 +25,19 @@ public class BoardQueryService {
             BoardEntity entity = optional.get();
             entity.setBoardcolumns(boardColumnDAO.findByBoardId(entity.getId()));
             return Optional.of(entity);
+        }
+        return Optional.empty();
+    }
+
+    public Optional<BoardDetailsDTO> showBoardDetails(final Long id) throws SQLException{
+        BoardDAO dao = new BoardDAO(connection);
+        BoardColumnDAO boardColumnDAO = new BoardColumnDAO(connection);
+        Optional<BoardEntity> optional = dao.findById(id);
+        if (optional.isPresent()) {
+            BoardEntity entity = optional.get();
+            List<BoardColumnDTO> columns = boardColumnDAO.findByBoardIdWithDetails(entity.getId());
+            BoardDetailsDTO dto = new BoardDetailsDTO(entity.getId(), entity.getName(), columns);
+            return Optional.of(dto);
         }
         return Optional.empty();
     }

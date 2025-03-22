@@ -1,15 +1,23 @@
 package br.com.board.ui;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Optional;
 import java.util.Scanner;
 
+import br.com.board.dto.BoardDetailsDTO;
 import br.com.board.persistence.entity.BoardEntity;
+import br.com.board.service.BoardQueryService;
 import lombok.AllArgsConstructor;
+import static br.com.board.persistence.config.ConnectionConfig.getConnection;
 
 @AllArgsConstructor
 public class BoardMenu {
     private final BoardEntity entity;
     private Scanner scanner = new Scanner(System.in);
-    public void execute() {
+
+    public void execute() throws SQLException{
+        try {
         System.out.printf("Bem vindo ao ao board %s, selecione a operação desejada\n", entity.getId());
 
         int option = -1;
@@ -34,7 +42,7 @@ public class BoardMenu {
                 case 3 -> blockCard();
                 case 4 -> unblockCard();
                 case 5 -> cancelCard();
-                case 6 -> showColumns();
+                case 6 -> showBoard();
                 case 7 -> showColumn();
                 case 8 -> showCard();
                 case 9 -> System.out.println("Voltando para o menu anterior");
@@ -42,21 +50,43 @@ public class BoardMenu {
                 default -> System.out.println("Opção inválida, informe uma opção do menu.");
             }
         }
-
+    } catch(SQLException e) {
+        e.printStackTrace();
+        System.exit(0);
     }
-    private void createCard() {}
 
-    private void moveCardToNextColumn() {}
+}
 
-    private void blockCard() {}
+    private void createCard() {
+    }
 
-    private void unblockCard() {}
+    private void moveCardToNextColumn() {
+    }
 
-    private void cancelCard() {}
+    private void blockCard() {
+    }
 
-    private void showColumns() {}
+    private void unblockCard() {
+    }
 
-    private void showColumn() {}
-    
-    private void showCard() {}
+    private void cancelCard() {
+    }
+
+    private void showBoard() throws SQLException {
+        try (Connection connection = getConnection()) {
+            Optional<BoardDetailsDTO> optional = new BoardQueryService(connection).showBoardDetails(entity.getId());
+            optional.ifPresent(b -> {
+                System.out.printf("Board [%s,%s]\n", b.id(), b.name());
+                b.columns().forEach(c -> {
+                    System.out.printf("Coluna [%s] tipo: [%s] tem %s cards\n", c.name(), c.kind(), c.cardsAmount());
+                });
+            });
+        }
+    }
+
+    private void showColumn() {
+    }
+
+    private void showCard() {
+    }
 }
