@@ -44,7 +44,8 @@ public class MainMenu {
     private void createBoard() throws SQLException{
         var entity = new BoardEntity();
         System.out.println("Informe o nome do seu Board:");
-        entity.setName(scanner.next());
+        scanner.next();
+        entity.setName(scanner.nextLine());
 
         System.out.println("Seu board terá colunas além das 3 padrões? Se sim informe quantas, senão digite 0:");
         int additionalColumns = scanner.nextInt();
@@ -70,7 +71,7 @@ public class MainMenu {
 
         System.out.println("Informe o nome da coluna de cancelamento do board: ");
         String cancelColumnName = scanner.next();
-        BoardColumnEntity cancelColumn = createColumn(cancelColumnName, BoardColumnKindEnum.CANCEL, additionalColumns + 1);
+        BoardColumnEntity cancelColumn = createColumn(cancelColumnName, BoardColumnKindEnum.CANCEL, additionalColumns + 2);
         columns.add(cancelColumn);
 
         entity.setBoardcolumns(columns);
@@ -98,7 +99,6 @@ public class MainMenu {
         Long id = scanner.nextLong();
         try (Connection connection = getConnection()){
             BoardService service = new BoardService(connection);
-            service.delete(id);
             if (service.delete(id)) {
                 System.out.printf("O Board %s foi excluido\n", id);
             } else {
