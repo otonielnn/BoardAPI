@@ -1,6 +1,6 @@
 plugins {
 	java
-	id("org.springframework.boot") version "3.4.3"
+	id("org.springframework.boot") version "3.4.4"
 	id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -23,6 +23,8 @@ dependencies {
 	implementation("mysql:mysql-connector-java:8.0.33")
 	implementation("org.projectlombok:lombok:1.18.34")
 	implementation("io.github.cdimascio:dotenv-java:3.2.0")
+
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
 
 	annotationProcessor("org.projectlombok:lombok:1.18.34")
 }

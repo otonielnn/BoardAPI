@@ -37,37 +37,41 @@ public class BoardColumnDAO {
         }
     }
 
-    public Optional<BoardColumnEntity> findById(final Long boardId) throws SQLException{
+    public List<BoardColumnEntity> findById(final Long boardId) throws SQLException {
+        List<BoardColumnEntity> columns = new ArrayList<>();
         String sql = """
-                    SELECT bc.name,
-                           bc.kind,
-                           c.id,
-                           c.title,
-                           c.description
-                    FROM BOARDS_COLUMNS bc
-                    INNER JOIN CARDS c
-                           ON c.board_column_id = bc.id
-                    WHERE bc.id = ?;
-                    """;
+            SELECT bc.id,
+                   bc.name,
+                   bc.kind,
+                   c.id AS card_id,
+                   c.title AS card_title,
+                   c.description AS card_description
+            FROM BOARDS_COLUMNS bc
+            LEFT JOIN CARDS c
+                   ON c.board_column_id = bc.id
+            WHERE bc.board_id = ?;
+            """;
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, boardId);
-            statement.executeQuery();
-            ResultSet resultSet = statement.getResultSet();
-            if (resultSet.next()) {
-                BoardColumnEntity entity = new BoardColumnEntity();
-                entity.setName(resultSet.getString("bc.name"));
-                entity.setKind(BoardColumnKindEnum.findByName(resultSet.getString("bc.kind")));
-                do  {
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    BoardColumnEntity column = new BoardColumnEntity();
+                    column.setId(resultSet.getLong("bc.id"));
+                    column.setName(resultSet.getString("bc.name"));
+                    column.setKind(BoardColumnKindEnum.findByName(resultSet.getString("bc.kind")));
+
+                    // Adicionar cartões à coluna
                     CardEntity card = new CardEntity();
-                    card.setId(resultSet.getLong("c.id"));
-                    card.setTitle(resultSet.getString("c.title"));
-                    card.setDescription(resultSet.getString("c.description"));
-                    entity.getCards().add(card);
-                } while ((resultSet.next()));
+                    card.setId(resultSet.getLong("card_id"));
+                    card.setTitle(resultSet.getString("card_title"));
+                    card.setDescription(resultSet.getString("card_description"));
+                    column.getCards().add(card);
+
+                    columns.add(column);
+                }
             }
         }
-
-        return Optional.empty();
+        return columns;
     }
 
     public List<BoardColumnDTO> findByBoardIdWithDetails(final Long boardId) throws SQLException{

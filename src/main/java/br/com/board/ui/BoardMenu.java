@@ -11,6 +11,7 @@ import br.com.board.persistence.entity.BoardColumnEntity;
 import br.com.board.persistence.entity.BoardEntity;
 import br.com.board.service.BoardColumnQueryService;
 import br.com.board.service.BoardQueryService;
+import br.com.board.service.CardQueryService;
 import lombok.AllArgsConstructor;
 import static br.com.board.persistence.config.ConnectionConfig.getConnection;
 
@@ -106,6 +107,19 @@ public class BoardMenu {
         }
     }
 
-    private void showCard() {
+    private void showCard() throws SQLException{
+        System.out.println("Informe o id do card que deseja visualizar");
+        Long selectedCardId = scanner.nextLong();
+        try (Connection connection = getConnection()) {
+            new CardQueryService(connection).findById(selectedCardId)
+            .ifPresentOrElse(c -> {
+                System.out.printf("Card %s - %s\n", c.id(), c.title());
+                System.out.printf("Descrição: %s\n", c.description());
+                System.out.println(c.blocked() ? "Está bloqueado pelo. Motivo: " + c.blockReason() : "Não está bloqueado");
+                System.out.printf("Já foi bloqueado %s vezes\n", c.blocksAmount());
+                System.out.printf("Está no momento na coluna %s - %s", c.columnId(), c.columnName());
+            },
+            () -> System.out.printf("Não existe um card com o id %s\n", selectedCardId));
+        }
     }
 }
