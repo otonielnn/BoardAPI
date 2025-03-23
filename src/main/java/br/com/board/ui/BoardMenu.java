@@ -2,11 +2,14 @@ package br.com.board.ui;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
 import br.com.board.dto.BoardDetailsDTO;
+import br.com.board.persistence.entity.BoardColumnEntity;
 import br.com.board.persistence.entity.BoardEntity;
+import br.com.board.service.BoardColumnQueryService;
 import br.com.board.service.BoardQueryService;
 import lombok.AllArgsConstructor;
 import static br.com.board.persistence.config.ConnectionConfig.getConnection;
@@ -84,7 +87,23 @@ public class BoardMenu {
         }
     }
 
-    private void showColumn() {
+    private void showColumn() throws SQLException{
+        System.out.printf("Escolha uma coluna do board %s\n", entity.getName());
+        List<Long> columnsIds = entity.getBoardcolumns().stream().map(BoardColumnEntity::getId).toList();
+        Long selectedColumn = -1L;
+        while (!columnsIds.contains(selectedColumn)) {
+            System.out.printf("Escolha uma coluna do board %s\n", entity.getName());
+            entity.getBoardcolumns().forEach(c -> System.out.printf("%s - %s [%s]\n", c.getId(), c.getName(), c.getKind()));
+            selectedColumn = scanner.nextLong();
+        }
+        try (Connection connection = getConnection()) {
+            Optional<BoardColumnEntity> column = new BoardColumnQueryService(connection).findById(selectedColumn);
+            column.ifPresent(co -> {
+                System.out.printf("Coluna %s tipo %s\n", co.getName(), co.getKind());
+                co.getCards().forEach(ca -> System.out.printf("Card %s - %s.\nDescrição: %s",
+                 ca.getId(), ca.getTitle(), ca.getDescription()));
+            });
+        }
     }
 
     private void showCard() {
