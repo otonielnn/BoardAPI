@@ -1,4 +1,4 @@
-package br.com.board.converter;
+package br.com.board.persistence.converter;
 
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
